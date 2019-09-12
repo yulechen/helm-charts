@@ -1,0 +1,9 @@
+aa:
+{{- template "mychart.labels" . }}
+"{{23 -}} <
+{{- 45}}"
+aa:
+{{- template "mychart.labels" . }}
+aa:
+{{- include "mychart.labels" . | indent 2 }}
+{{- include "mychart.labels" . | nindent 2 }}

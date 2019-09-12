@@ -1,0 +1,62 @@
+---
+# Deploy the Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-logging
+  namespace: {{ .Values.namespace }}
+  labels:
+    k8s-app: kibana-logging
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "Kibana"
+    chart: {{ include "efk-aks.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: 5601
+    protocol: TCP
+    targetPort: ui
+    nodePort: 31065
+  type: NodePort
+  selector:
+    k8s-app: kibana-logging
+
+---
+# Create the Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-logging
+  namespace: {{ .Values.namespace }}
+  labels:
+    k8s-app: kibana-logging
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: kibana-logging
+  template:
+    metadata:
+      labels:
+        k8s-app: kibana-logging
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
+    spec:
+      containers:
+      - name: kibana-logging
+        image: harbor.peoplus.cn/moye/kibana-oss:{{ .Values.kibana.version }}
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: ELASTICSEARCH_URL
+            value: http://elasticsearch-logging:9200
+        ports:
+        - containerPort: 5601
+          name: ui
+          protocol: TCP

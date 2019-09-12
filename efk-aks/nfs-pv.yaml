@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efk-pv
+spec:
+  capacity:
+    storage: 20Gi
+  # volumeMode field requires BlockVolume Alpha feature gate to be enabled.
+  # block to use a raw block device
+  # filesystem to use a filesystem(default)
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    # this dir must be exits
+    path: /mnt/shared/elk-data
+    server: 192.168.1.200
